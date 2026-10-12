@@ -33,7 +33,7 @@
         <span class="num">${n}</span>
         <div class="tmeta">
           <span class="who">${esc(d.author)} <span class="what">${esc(d.handle)}</span></span>
-          <span class="what">${esc(d.cat)}, ${esc(d.type)}${d.date ? " · " + esc(d.date) : ""}</span>
+          <span class="what">${d.star ? '<b class="star">★ milyon dolarlık</b> · ' : ""}${esc(d.cat)}, ${esc(d.type)}${d.date ? " · " + esc(d.date) : ""}</span>
           ${d.title ? `<h3 class="ttitle"><a href="${esc(d.url)}" target="_blank" rel="noopener">${esc(d.title)}</a></h3>` : ""}
           ${d.summary ? `<p class="tsum">${esc(d.summary)}</p>` : `<p class="tsum muted">İçerik gönderi kartında.</p>`}
           ${links(d.url, d.id)}
@@ -65,7 +65,8 @@
 
   let active = "Hepsi", query = "";
   const filters = $("#filters");
-  filters.innerHTML = [["Hepsi", DATA.length], ...cats.map(c => [c, counts[c]])]
+  const STAR = "★ Milyon dolarlık", stars = DATA.filter(d => d.star).length;
+  filters.innerHTML = [["Hepsi", DATA.length], ...(stars ? [[STAR, stars]] : []), ...cats.map(c => [c, counts[c]])]
     .map(([c, n]) => `<button class="chip" role="tab" data-cat="${esc(c)}" aria-selected="${c === active}">${esc(c)}<sup>${n}</sup></button>`).join("");
   filters.addEventListener("click", e => {
     const b = e.target.closest(".chip"); if (!b) return;
@@ -89,7 +90,7 @@
   }), { rootMargin: "600px 0px" });
 
   function render() {
-    const list = DATA.filter(d => (active === "Hepsi" || d.cat === active) &&
+    const list = DATA.filter(d => (active === "Hepsi" || d.cat === active || (active === STAR && d.star)) &&
       (!query || lower(cfg.fields(d).join(" ")).includes(query)));
     $("#list").innerHTML = list.map(d => cfg.row(d, String(DATA.indexOf(d) + 1).padStart(3, "0"))).join("");
     $("#empty").hidden = list.length > 0;

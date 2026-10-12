@@ -108,3 +108,5 @@ h2{font-size:1.9rem;font-weight:800;letter-spacing:-.03em}
 .ttitle a{text-decoration:none}
 .ttitle a:hover{color:var(--red)}
 .ttitle+.tsum{margin-top:6px!important;font-size:1rem;color:var(--soft)!important}
+.star{color:var(--red);font-weight:700}
+.chip[data-cat^="★"]{color:var(--red)}

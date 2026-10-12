@@ -6,7 +6,7 @@
 <title>selenophile — akışta kaybolan fikirler</title>
 <meta name="description" content="İnternette kaybolan değerli fikirlerin Türkçe seçkisi. Elle seçilir, kısaca özetlenir, kaynağına bağlanır.">
 <meta property="og:title" content="selenophile — akışta kaybolan fikirler">
-<meta property="og:description" content="İnternette kaybolan değerli fikirlerin Türkçe seçkisi.">
+<meta property="og:description" content="İnternette kaybolan değerli fikirlerin Türkçe seçkisi. Elle seçilir, kısaca özetlenir, kaynağına bağlanır.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://selenophile.art/">
 <meta name="theme-color" content="#f4f2ec">
@@ -14,16 +14,12 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:ital,wght@0,400;0,500;0,700;0,800;1,400&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=202610130132">
+<link rel="stylesheet" href="style.css?v=202610130150">
 </head>
-<body>
+<body data-page="fikirler">
 <header class="top">
   <a class="mark" href="./"><span class="dot" aria-hidden="true"></span>selenophile</a>
-  <nav>
-    <a href="#liste">Liste</a>
-    <a href="#hakkinda">Hakkında</a>
-    <a href="#gonder">Öner</a>
-  </nav>
+  <nav><a href="index.html" aria-current="page">Fikirler</a><a href="tweetler.html">Tweetler</a><a href="pdfler.html">PDF'ler</a></nav>
 </header>
 
 <main>
@@ -31,17 +27,18 @@
     <h1>Akışta kaybolan fikirler, Türkçe.</h1>
     <div class="intro-side">
       <p>İnternette her gün çok iyi fikirler paylaşılıyor ve birkaç saat içinde akışın altında kalıyor. Burada onlardan seçtiklerimizi kısaca Türkçe özetliyor, kaynağına bağlıyoruz.</p>
-      <p class="meta"><span id="stat-total">0</span> fikir · <span id="stat-cats">0</span> konu · bu gece <span id="phase-name">ay</span></p>
+      <p class="meta"><span id="stat-total">0</span> fikir · <span id="stat-cats">0</span> konu · bu gece <span class="phase-name">ay</span></p>
     </div>
   </section>
 
   <section id="liste" class="list-wrap">
     <div class="toolbar">
       <div id="filters" class="filters" role="tablist" aria-label="Konular"></div>
-      <input id="q" class="search" type="search" placeholder="Ara" aria-label="Fikir, yazar ya da konu ara" autocomplete="off">
+      <input id="q" class="search" type="search" placeholder="Ara" aria-label="Ara" autocomplete="off">
     </div>
     <ol id="list" class="list"></ol>
     <p id="empty" class="empty" hidden>Bu aramayla eşleşen bir şey yok.</p>
+    
   </section>
 
   <section id="hakkinda" class="about">
@@ -66,15 +63,16 @@
       <button type="submit">Gönder</button>
     </form>
   </section>
+
 </main>
 
 <footer class="foot">
-  <span>selenophile.art · <span id="yr"></span></span>
-  <span>Tüm yazılar ve fikirler sahiplerine aittir.</span>
+  <span>selenophile.art · <span class="yr"></span></span>
+  <span>Tüm yazılar, gönderiler ve belgeler sahiplerine aittir.</span>
 </footer>
 
 <div id="toast" class="toast" role="status"></div>
-<script src="data.js?v=202610130132"></script>
-<script src="app.js?v=202610130132"></script>
+<script src="data.js?v=202610130150"></script>
+<script src="app.js?v=202610130150"></script>
 </body>
 </html>

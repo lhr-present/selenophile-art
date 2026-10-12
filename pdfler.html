@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PDF'ler — selenophile</title>
+<meta name="description" content="Teknolojiyi, piyasaları ve fikir dünyasını değiştiren belgeler; orijinal adreslerine bağlı, Türkçe açıklamalı.">
+<meta property="og:title" content="PDF'ler — selenophile">
+<meta property="og:description" content="Teknolojiyi, piyasaları ve fikir dünyasını değiştiren belgeler; orijinal adreslerine bağlı, Türkçe açıklamalı.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://selenophile.art/pdfler.html">
+<meta name="theme-color" content="#f4f2ec">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='7' fill='%23161513'/%3E%3Cpath d='M8 1a7 7 0 0 1 0 14z' fill='%23d93a1c'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:ital,wght@0,400;0,500;0,700;0,800;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css?v=202610130150">
+</head>
+<body data-page="pdfler">
+<header class="top">
+  <a class="mark" href="./"><span class="dot" aria-hidden="true"></span>selenophile</a>
+  <nav><a href="index.html">Fikirler</a><a href="tweetler.html">Tweetler</a><a href="pdfler.html" aria-current="page">PDF'ler</a></nav>
+</header>
+
+<main>
+  <section class="intro">
+    <h1>Dünyayı değiştiren belgeler.</h1>
+    <div class="intro-side">
+      <p>Bir sayfa makale, üç sayfalık bir plan, bir yatırım notu. Her belge orijinal adresinden açılır; PDF olanların çoğunu burada önizleyebilirsiniz.</p>
+      <p class="meta"><span id="stat-total">0</span> belge · <span id="stat-cats">0</span> konu · bu gece <span class="phase-name">ay</span></p>
+    </div>
+  </section>
+
+  <section id="liste" class="list-wrap">
+    <div class="toolbar">
+      <div id="filters" class="filters" role="tablist" aria-label="Konular"></div>
+      <input id="q" class="search" type="search" placeholder="Ara" aria-label="Ara" autocomplete="off">
+    </div>
+    <ol id="list" class="list"></ol>
+    <p id="empty" class="empty" hidden>Bu aramayla eşleşen bir şey yok.</p>
+    <p class="source-note">Bu liste <a href="https://billiondollarpdf.com/" target="_blank" rel="noopener">billiondollarpdf.com</a> seçkisinden derlendi. Belgeler burada barındırılmaz, sahiplerinin sitesinden açılır.</p>
+  </section>
+
+</main>
+
+<footer class="foot">
+  <span>selenophile.art · <span class="yr"></span></span>
+  <span>Tüm yazılar, gönderiler ve belgeler sahiplerine aittir.</span>
+</footer>
+
+<div id="toast" class="toast" role="status"></div>
+<script src="pdfs.js?v=202610130150"></script>
+<script src="app.js?v=202610130150"></script>
+</body>
+</html>

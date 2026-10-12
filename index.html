@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Selenophile — Milyar Dolarlık Fikirler</title>
+<meta name="description" content="X'te ve internette kaybolan en değerli fikirlerin Türkçe seçkisi. Elle seçilir, özenle özetlenir.">
+<meta property="og:title" content="Selenophile — Milyar Dolarlık Fikirler">
+<meta property="og:description" content="Akışta kaybolan en değerli fikirlerin Türkçe seçkisi.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://selenophile.art/">
+<meta name="theme-color" content="#0c0b10">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='26' fill='%23efe6d2'/%3E%3Ccircle cx='42' cy='26' r='22' fill='%230c0b10'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..600&family=Manrope:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<canvas id="stars" aria-hidden="true"></canvas>
+<div class="grain" aria-hidden="true"></div>
+
+<header class="nav">
+  <a class="brand" href="#top" aria-label="Selenophile ana sayfa">
+    <svg viewBox="0 0 32 32" width="22" height="22" aria-hidden="true"><circle cx="16" cy="16" r="13" fill="var(--moon)"/><circle cx="21" cy="12" r="11" fill="var(--ink)"/></svg>
+    <span>Selenophile</span>
+  </a>
+  <nav>
+    <a href="#secki">Seçki</a>
+    <a href="#hakkinda">Hakkında</a>
+    <a href="#manifesto">Manifesto</a>
+    <a class="pill" href="#gonder">Fikir Gönder</a>
+  </nav>
+</header>
+
+<main id="top">
+  <section class="hero">
+    <div class="hero-text">
+      <p class="eyebrow">Cilt I · Ay ışığında bir seçki</p>
+      <h1>Milyar Dolarlık<br><em>Fikirler</em></h1>
+      <p class="lede">İnternet parlak zihinlerle dolu. Ama akış hızlı, algoritma unutkan; en değerli fikirler birkaç saat içinde gömülüp gidiyor.</p>
+      <p class="lede strong">Artık değil.</p>
+      <div class="stats">
+        <div><span id="stat-total">0</span><small>fikir</small></div>
+        <div><span id="stat-cats">0</span><small>kategori</small></div>
+        <div><span>TR</span><small>Türkçe özet</small></div>
+      </div>
+    </div>
+    <div class="moon-wrap" aria-hidden="true">
+      <svg class="moon" viewBox="0 0 400 400">
+        <defs>
+          <radialGradient id="mg" cx="38%" cy="35%" r="70%">
+            <stop offset="0%" stop-color="#fbf5e6"/><stop offset="55%" stop-color="#e8dcc0"/><stop offset="100%" stop-color="#b9a988"/>
+          </radialGradient>
+          <radialGradient id="cr" cx="40%" cy="40%" r="60%">
+            <stop offset="0%" stop-color="#c9b994" stop-opacity=".2"/><stop offset="100%" stop-color="#a39272" stop-opacity=".75"/>
+          </radialGradient>
+          <filter id="rough"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="3" seed="7"/><feColorMatrix values="0 0 0 0 .4  0 0 0 0 .35  0 0 0 0 .28  0 0 0 .22 0"/><feComposite in2="SourceGraphic" operator="in"/></filter>
+          <clipPath id="mc"><circle cx="200" cy="200" r="170"/></clipPath>
+        </defs>
+        <circle cx="200" cy="200" r="190" fill="none" stroke="var(--moon)" stroke-opacity=".12"/>
+        <circle cx="200" cy="200" r="170" fill="url(#mg)"/>
+        <g clip-path="url(#mc)">
+          <circle cx="150" cy="140" r="34" fill="url(#cr)"/><circle cx="250" cy="120" r="16" fill="url(#cr)"/>
+          <circle cx="270" cy="230" r="44" fill="url(#cr)"/><circle cx="160" cy="260" r="22" fill="url(#cr)"/>
+          <circle cx="210" cy="320" r="14" fill="url(#cr)"/><circle cx="95" cy="210" r="11" fill="url(#cr)"/>
+          <ellipse cx="190" cy="200" rx="60" ry="40" fill="#a89878" opacity=".18"/>
+          <rect width="400" height="400" filter="url(#rough)" fill="#fff"/>
+          <circle class="shadow" cx="200" cy="200" r="172" fill="var(--ink)" opacity=".9"/>
+        </g>
+      </svg>
+      <p class="moon-cap">Ayın evresi: <span id="phase-name">—</span></p>
+    </div>
+  </section>
+
+  <section id="secki" class="collection">
+    <div class="collection-head">
+      <h2>Seçki</h2>
+      <label class="search">
+        <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/><path d="M20 20l-4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <input id="q" type="search" placeholder="Fikir, yazar ya da konu ara…" autocomplete="off">
+      </label>
+    </div>
+    <div id="filters" class="filters" role="tablist" aria-label="Kategoriler"></div>
+    <div id="grid" class="grid" aria-live="polite"></div>
+    <p id="empty" class="empty" hidden>Bu gece gökyüzü boş. Başka bir arama deneyin.</p>
+  </section>
+
+  <section id="hakkinda" class="prose">
+    <p class="eyebrow">Hakkında</p>
+    <h2>Neden bu seçki?</h2>
+    <p>X, bloglar ve denemeler; dünyanın en iyi kurucularının, mühendislerinin ve sanatçılarının ücretsiz dersleriyle dolu. Sorun şu ki çoğu İngilizce, dağınık ve birkaç saat içinde akışta kayboluyor.</p>
+    <p>Selenophile bu fikirleri tek tek seçer, Türkçeye kendi cümleleriyle özetler ve sizi her zaman orijinal kaynağa yönlendirir. Her girdi, yayına alınmadan önce elle okunur ve gözden geçirilir.</p>
+    <p class="note">Fikirler ve metinler sahiplerine aittir. Buradaki özetler yorumdur; bütün emeği görmek için kaynağı okuyun.</p>
+  </section>
+
+  <section id="manifesto" class="manifesto">
+    <p class="eyebrow">Manifesto</p>
+    <ol>
+      <li><span>I.</span> Az ama öz. Bir fikir, ancak hayatı değiştirebiliyorsa buraya girer.</li>
+      <li><span>II.</span> Kaynak kutsaldır. Her özet, orijinal sesine bir kapı açar.</li>
+      <li><span>III.</span> Türkçe düşünmek bir lükstür; onu herkese açık kılmak bir görev.</li>
+      <li><span>IV.</span> Algoritma unutur, seçki hatırlar.</li>
+      <li><span>V.</span> Gece en karanlık olduğunda ay en net görünür.</li>
+    </ol>
+  </section>
+
+  <section id="gonder" class="submit">
+    <div>
+      <p class="eyebrow">Katkı</p>
+      <h2>Akışta bir hazine mi buldunuz?</h2>
+      <p>Bağlantıyı gönderin. Seçkiye girerse adınızla birlikte yayınlarız.</p>
+    </div>
+    <form id="submit-form" class="submit-form">
+      <input name="url" type="url" required placeholder="https://x.com/…">
+      <input name="why" type="text" placeholder="Neden değerli? (isteğe bağlı)">
+      <button type="submit">Gönder <span aria-hidden="true">→</span></button>
+    </form>
+  </section>
+</main>
+
+<footer class="foot">
+  <p><svg viewBox="0 0 32 32" width="16" height="16" aria-hidden="true"><circle cx="16" cy="16" r="13" fill="var(--moon)"/><circle cx="21" cy="12" r="11" fill="var(--ink)"/></svg> Selenophile · © <span id="yr"></span></p>
+  <p class="muted">Tüm tweetler, yazılar ve fikirler orijinal yazarlarına ve platformlarına aittir. Selenophile yalnızca seçer ve özetler.</p>
+</footer>
+
+<div id="toast" class="toast" role="status"></div>
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

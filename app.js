@@ -117,6 +117,10 @@
 
   function focusHash() {
     const id = decodeURIComponent(location.hash.slice(1));
+    // Eskiden ana sayfadaki fikir bağlantıları artık fikirler.html'de
+    if (PAGE === "tweetler" && id && !/^t\d+$/.test(id) && !["liste","hakkinda","gonder"].includes(id)) {
+      location.replace("fikirler.html#" + encodeURIComponent(id)); return;
+    }
     const el = id && DATA.some(d => d.id === id) && document.getElementById(id);
     if (!el) return;
     el.scrollIntoView({ block: "start" });

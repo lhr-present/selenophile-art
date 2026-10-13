@@ -64,7 +64,7 @@
         <div><h3><a href="${esc(d.url)}" target="_blank" rel="noopener">${esc(d.title)}</a></h3>
           <p>${esc(d.summary)}</p><div class="viewer" hidden></div></div>
         <div class="side"><span class="who">${esc(d.author)}</span><span class="what">${esc(d.date)} · ${esc(d.type)}${d.pdf ? ' · <b class="badge">PDF</b>' : ""}</span>
-          <span class="what">${esc(d.cat)}</span>
+          <span class="what">${d.star ? '<b class="star">★ milyon dolarlık</b> · ' : ""}${esc(d.cat)}</span>
           ${links(d.url, d.id, d.title, d.preview ? `<button type="button" data-preview="${esc(d.url)}" aria-expanded="false" aria-label="${esc("Önizle: " + d.title)}">Önizle</button>` : "")}</div></li>`
     }
   };

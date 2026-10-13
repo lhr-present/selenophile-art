@@ -3,7 +3,8 @@
   const REPO = "https://github.com/lhr-present/selenophile-art";
   const $ = s => document.querySelector(s);
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-  const lower = s => String(s ?? "").toLocaleLowerCase("tr");
+  // Aramada I/ı ve şapka/aksan farkı gözetilmez: "Intelligence", "yapay zeka", "sirket" de bulunur
+  const lower = s => String(s ?? "").toLocaleLowerCase("tr").replace(/ı/g, "i").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
   const dark = () => matchMedia("(prefers-color-scheme: dark)").matches;
   const hashId = () => { try { return decodeURIComponent(location.hash.slice(1)); } catch { return ""; } };  // bozuk %-kodlu adres hata vermesin
 
@@ -14,6 +15,7 @@
   document.querySelectorAll(".phase-name").forEach(e => e.textContent = phase);
   document.querySelectorAll(".yr").forEach(e => e.textContent = new Date().getFullYear());
 
+  const langAttr = t => /^[\x00-\x7F’‘“”–—…]*$/.test(t) && /[a-z]/i.test(t) ? ' lang="en"' : "";  // İngilizce başlıklar doğru okunsun
   const typeLabel = { makale: "yazı", thread: "thread", tweet: "tweet", "konuşma": "konuşma" };
   const links = (url, id, name, extra = "") =>
     `<span class="links"><a href="${esc(url)}" target="_blank" rel="noopener" aria-label="${esc((PAGE === "tweetler" ? "X'te aç: " : "Kaynak: ") + name)} (yeni sekme)">${PAGE === "tweetler" ? "X'te aç" : "Kaynak"}</a>${extra}<button type="button" data-copy="${esc(id)}" aria-label="${esc("Bağlantı kopyala: " + name)}">Bağlantı</button></span>`;
@@ -35,7 +37,7 @@
       fields: d => [d.title, d.summary, d.author, d.handle, d.cat],
       row: (d, n) => `<li class="row" id="${esc(d.id)}">
         <span class="num">${n}</span>
-        <div><h3><a href="${esc(d.url)}" target="_blank" rel="noopener">${esc(d.title)}</a></h3><p>${esc(d.summary)}</p></div>
+        <div><h3${langAttr(d.title)}><a href="${esc(d.url)}" target="_blank" rel="noopener">${esc(d.title)}</a></h3><p>${esc(d.summary)}</p></div>
         <div class="side"><span class="who">${esc(d.author)}</span><span class="what">${esc(d.cat)}, ${esc(typeLabel[d.type] || d.type)}</span>${links(d.url, d.id, d.title)}</div></li>`
     },
     tweetler: {
@@ -61,7 +63,7 @@
       fields: d => [d.title, d.summary, d.author, d.cat, d.type, d.date],
       row: (d, n) => `<li class="row${d.star ? " is-star" : ""}" id="${esc(d.id)}">
         <span class="num">${n}</span>
-        <div><h3><a href="${esc(d.url)}" target="_blank" rel="noopener">${esc(d.title)}</a></h3>
+        <div><h3${langAttr(d.title)}><a href="${esc(d.url)}" target="_blank" rel="noopener">${esc(d.title)}</a></h3>
           <p>${esc(d.summary)}</p><div class="viewer" hidden></div></div>
         <div class="side"><span class="who">${esc(d.author)}</span><span class="what">${esc(d.date)} · ${esc(d.type)}${d.pdf ? ' · <b class="badge">PDF</b>' : ""}</span>
           <span class="what">${d.star ? '<b class="star">★ milyon dolarlık</b> · ' : ""}${esc(d.cat)}</span>
@@ -124,10 +126,15 @@
       .then(() => setTimeout(() => en.target.querySelector("iframe") || en.target.classList.add("failed"), 8000));  // kart gelmediyse yedek alıntıyı göster
   }), { rootMargin: "600px 0px" });
 
+  // Ekranın üstünde kalmış bir X kartı geç yüklenip boy değiştirirse, görünen içerik kaymasın diye sayfayı o kadar kaydır
+  const ro = "ResizeObserver" in window && new ResizeObserver(es => es.forEach(e => {
+    const el = e.target, h = el.offsetHeight, p = el._h; el._h = h;
+    if (p != null && h !== p && el.getBoundingClientRect().bottom <= 0) scrollBy(0, h - p);
+  }));
   function more(n) {
     const next = list.slice(shown, shown + n);
     listEl.insertAdjacentHTML("beforeend", next.map(d => cfg.row(d, NUM.get(d))).join(""));
-    if (PAGE === "tweetler" && io) next.forEach(d => io.observe(document.getElementById(d.id).querySelector(".embed")));
+    if (PAGE === "tweetler" && io) next.forEach(d => { const em = document.getElementById(d.id).querySelector(".embed"); io.observe(em); ro && ro.observe(em); });
     shown += next.length;
     if (moreBtn) {
       moreBtn.hidden = shown >= list.length;
@@ -143,6 +150,10 @@
     $("#empty").hidden = list.length > 0;
   }
   render();
+  addEventListener("beforeprint", () => shown < list.length && more(list.length - shown));  // baskıda tüm liste çıksın
+  // Yapışkan araç çubuğunun yüksekliği kadar kaydırma payı (tablet genişliğinde çubuk daha uzun)
+  const tb = $(".toolbar"), setTb = () => tb && document.documentElement.style.setProperty("--tb", (getComputedStyle(tb).position === "sticky" ? tb.offsetHeight : 8) + "px");
+  setTb(); addEventListener("resize", setTb);
   moreBtn && moreBtn.addEventListener("click", () => {
     const first = more(STEP);
     const a = first && document.getElementById(first.id).querySelector("a");
@@ -156,7 +167,7 @@
     if (pv) {
       const v = pv.closest(".row").querySelector(".viewer");
       if (v.hidden) {
-        v.innerHTML = `<iframe src="${esc(pv.dataset.preview)}#view=FitH" title="PDF önizleme" loading="lazy"></iframe><p class="vnote">Görünmüyorsa <a href="${esc(pv.dataset.preview)}" target="_blank" rel="noopener">PDF'i yeni sekmede açın</a>.</p>`;
+        v.innerHTML = `<iframe src="${esc(pv.dataset.preview)}#view=FitH" title="PDF önizleme" loading="lazy"></iframe><p class="vnote">Görünmüyorsa <a href="${esc(pv.dataset.preview)}" target="_blank" rel="noopener">PDF'i yeni sekmede aç</a>.</p>`;
         v.hidden = false; pv.textContent = "Kapat";
       } else { v.innerHTML = ""; v.hidden = true; pv.textContent = "Önizle"; }
       pv.setAttribute("aria-expanded", !v.hidden);

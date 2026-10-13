@@ -9,17 +9,28 @@
 <meta property="og:description" content="İnternette kaybolan değerli yazıların ve konuşmaların Türkçe seçkisi. Elle seçilir, kısaca özetlenir, kaynağına bağlanır.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://selenophile.art/fikirler.html">
-<meta name="theme-color" content="#f4f2ec">
+<link rel="canonical" href="https://selenophile.art/fikirler.html">
+<meta property="og:site_name" content="selenophile">
+<meta property="og:locale" content="tr_TR">
+<meta property="og:image" content="https://selenophile.art/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="selenophile: Akışta kalmaması gereken gönderiler.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#f4f2ec" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#141412" media="(prefers-color-scheme: dark)">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='7' fill='%23161513'/%3E%3Cpath d='M8 1a7 7 0 0 1 0 14z' fill='%23d93a1c'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:ital,wght@0,400;0,500;0,700;0,800;1,400&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=202610130226">
+<link rel="stylesheet" href="style.css?v=202610130300">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"ItemList","name":"Fikirler — selenophile","url":"https://selenophile.art/fikirler.html","numberOfItems":59,"itemListElement":[{"@type":"ListItem","position":1,"url":"https://selenophile.art/fikirler.html#zengin-olmak","name":"Zenginlik şansla değil, kaldıraçla kurulur"},{"@type":"ListItem","position":2,"url":"https://selenophile.art/fikirler.html#buyuk-is","name":"Büyük iş, merakın peşinden inatla gitmektir"},{"@type":"ListItem","position":3,"url":"https://selenophile.art/fikirler.html#olceklenmeyen","name":"İlk kullanıcıları elle topla"},{"@type":"ListItem","position":4,"url":"https://selenophile.art/fikirler.html#fikir-bulmak","name":"Fikir düşünülmez, fark edilir"},{"@type":"ListItem","position":5,"url":"https://selenophile.art/fikirler.html#sikici-isler","name":"Kimsenin dokunmak istemediği işte para var"},{"@type":"ListItem","position":6,"url":"https://selenophile.art/fikirler.html#maker-takvimi","name":"Üreticinin günü toplantıyla bölünmez"},{"@type":"ListItem","position":7,"url":"https://selenophile.art/fikirler.html#yazmak-dusunmek","name":"Yazamayan, düşünemez"},{"@type":"ListItem","position":8,"url":"https://selenophile.art/fikirler.html#dogrusal-olmayan","name":"Getiriler doğrusal değil, katlanarak büyür"},{"@type":"ListItem","position":9,"url":"https://selenophile.art/fikirler.html#basarili-olmak","name":"Kendini bileşik faiz gibi büyüt"},{"@type":"ListItem","position":10,"url":"https://selenophile.art/fikirler.html#bin-hayran","name":"Milyonlara değil, bin gerçek hayrana ihtiyacın var"}]}</script>
 </head>
 <body data-page="fikirler">
+<a class="skip" href="#liste">İçeriğe geç</a>
 <header class="top">
   <a class="mark" href="./"><span class="dot" aria-hidden="true"></span>selenophile</a>
-  <nav><a href="index.html">Tweetler</a><a href="fikirler.html" aria-current="page">Fikirler</a><a href="pdfler.html">PDF'ler</a></nav>
+  <nav><a href="./">Tweetler</a><a href="fikirler.html" aria-current="page">Fikirler</a><a href="pdfler.html">PDF'ler</a></nav>
 </header>
 
 <main>
@@ -31,12 +42,16 @@
     </div>
   </section>
 
-  <section id="liste" class="list-wrap">
+  <section id="liste" class="list-wrap" tabindex="-1">
     <div class="toolbar">
-      <div id="filters" class="filters" role="tablist" aria-label="Konular"></div>
-      <input id="q" class="search" type="search" placeholder="Ara" aria-label="Ara" autocomplete="off">
+      <div id="filters" class="filters" role="group" aria-label="Konular"></div>
+      <div class="tools">
+        <input id="q" class="search" type="search" placeholder="Ara" aria-label="Listede ara" autocomplete="off">
+        <p id="tool-links" class="tool-links"></p>
+      </div>
     </div>
     <ol id="list" class="list"></ol>
+    <button id="more" class="more" type="button" hidden>Daha fazla göster</button>
     <p id="empty" class="empty" hidden>Bu aramayla eşleşen bir şey yok.</p>
     
   </section>
@@ -49,7 +64,7 @@
 </footer>
 
 <div id="toast" class="toast" role="status"></div>
-<script src="data.js?v=202610130226"></script>
-<script src="app.js?v=202610130226"></script>
+<script src="data.js?v=202610130300"></script>
+<script src="app.js?v=202610130300"></script>
 </body>
 </html>

@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://selenophile.art/sitemap.xml

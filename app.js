@@ -14,8 +14,13 @@
   document.querySelectorAll(".yr").forEach(e => e.textContent = new Date().getFullYear());
 
   const typeLabel = { makale: "yazı", thread: "thread", tweet: "tweet", "konuşma": "konuşma" };
-  const links = (url, id, extra = "") =>
-    `<span class="links"><a href="${esc(url)}" target="_blank" rel="noopener">${PAGE === "tweetler" ? "X'te aç" : "Kaynak"}</a>${extra}<button data-copy="${esc(id)}">Bağlantı</button></span>`;
+  const links = (url, id, name, extra = "") =>
+    `<span class="links"><a href="${esc(url)}" target="_blank" rel="noopener" aria-label="${esc((PAGE === "tweetler" ? "X'te aç: " : "Kaynak: ") + name)} (yeni sekme)">${PAGE === "tweetler" ? "X'te aç" : "Kaynak"}</a>${extra}<button type="button" data-copy="${esc(id)}" aria-label="${esc("Bağlantı kopyala: " + name)}">Bağlantı</button></span>`;
+
+  // Gömme için önceden yer ayrılır (X kartı gelince sayfa kaymasın). Tahmin, 390 ve 1440px'te
+  // ölçülen kart yüksekliklerinden: yazı uzunluğuna göre; görselli kartlar CSS'te genişliğe göre.
+  const embedStyle = d => /pic\.(twitter|x)\.com/.test(d.text) ? ' class="embed media"'
+    : ` class="embed" style="min-height:${Math.min(700, Math.round(190 + 0.6 * d.text.replace(/<[^>]+>/g, "").length + 11 * (d.text.split("<br>").length - 1)))}px"`;
 
   const PAGES = {
     fikirler: {
@@ -24,7 +29,7 @@
       row: (d, n) => `<li class="row" id="${esc(d.id)}">
         <span class="num">${n}</span>
         <div><h3><a href="${esc(d.url)}" target="_blank" rel="noopener">${esc(d.title)}</a></h3><p>${esc(d.summary)}</p></div>
-        <div class="side"><span class="who">${esc(d.author)}</span><span class="what">${esc(d.cat)}, ${esc(typeLabel[d.type] || d.type)}</span>${links(d.url, d.id)}</div></li>`
+        <div class="side"><span class="who">${esc(d.author)}</span><span class="what">${esc(d.cat)}, ${esc(typeLabel[d.type] || d.type)}</span>${links(d.url, d.id, d.title)}</div></li>`
     },
     tweetler: {
       data: window.TWEETLER || [],
@@ -36,10 +41,10 @@
           <span class="what">${d.star ? '<b class="star">★ milyon dolarlık</b> · ' : ""}${esc(d.cat)}, ${esc(d.type)}${d.date ? " · " + esc(d.date) : ""}</span>
           ${d.title ? `<h3 class="ttitle"><a href="${esc(d.url)}" target="_blank" rel="noopener">${esc(d.title)}</a></h3>` : ""}
           ${d.summary ? `<p class="tsum">${esc(d.summary)}</p>` : `<p class="tsum muted">İçerik gönderi kartında.</p>`}
-          ${links(d.url, d.id)}
+          ${links(d.url, d.id, d.title || d.author)}
         </div>
-        <div class="embed" data-tid="${esc(d.tid)}">
-          <blockquote class="twitter-tweet" data-dnt="true" data-conversation="none" data-theme="${dark() ? "dark" : "light"}">
+        <div${embedStyle(d)} data-tid="${esc(d.tid)}">
+          <blockquote class="x-tweet" data-dnt="true" data-conversation="none">
             <p${d.lang && d.lang !== "zxx" ? ` lang="${esc(d.lang)}"` : ""}>${d.text}</p>&mdash; ${esc(d.author)} (${esc(d.handle)}) <a href="${esc(d.url)}">${esc(d.date || "X")}</a>
           </blockquote>
         </div></li>`
@@ -53,7 +58,7 @@
           <p>${esc(d.summary)}</p><div class="viewer" hidden></div></div>
         <div class="side"><span class="who">${esc(d.author)}</span><span class="what">${esc(d.date)} · ${esc(d.type)}${d.pdf ? ' · <b class="badge">PDF</b>' : ""}</span>
           <span class="what">${esc(d.cat)}</span>
-          ${links(d.url, d.id, d.preview ? `<button data-preview="${esc(d.url)}">Önizle</button>` : "")}</div></li>`
+          ${links(d.url, d.id, d.title, d.preview ? `<button type="button" data-preview="${esc(d.url)}" aria-expanded="false" aria-label="${esc("Önizle: " + d.title)}">Önizle</button>` : "")}</div></li>`
     }
   };
   const cfg = PAGES[PAGE], DATA = cfg.data;
@@ -62,45 +67,84 @@
   const cats = Object.keys(counts).sort((a, b) => a.localeCompare(b, "tr"));
   $("#stat-total").textContent = DATA.length;
   $("#stat-cats").textContent = cats.length;
+  const NUM = new Map(DATA.map((d, i) => [d, String(i + 1).padStart(3, "0")]));
+  // En yeni: tweet kimliği zamana göre artar (eski kısa kimlikler de dahil)
+  const NEWEST = DATA.slice().sort((a, b) => String(b.tid).length - String(a.tid).length || (b.tid > a.tid ? 1 : b.tid < a.tid ? -1 : 0));
 
-  let active = "Hepsi", query = "";
-  const filters = $("#filters");
+  // Uzun liste parça parça çizilir; DOM ve X iframe sayısı küçük kalır
+  const STEP = PAGE === "tweetler" ? 30 : Infinity;
+  let active = "Hepsi", query = "", order = "secki", list = [], shown = 0;
+  const filters = $("#filters"), q = $("#q"), listEl = $("#list"), moreBtn = $("#more"), tools = $("#tool-links");
   const STAR = "★ Milyon dolarlık", stars = DATA.filter(d => d.star).length;
   filters.innerHTML = [["Hepsi", DATA.length], ...(stars ? [[STAR, stars]] : []), ...cats.map(c => [c, counts[c]])]
-    .map(([c, n]) => `<button class="chip" role="tab" data-cat="${esc(c)}" aria-selected="${c === active}">${esc(c)}<sup>${n}</sup></button>`).join("");
+    .map(([c, n]) => `<button type="button" class="chip" data-cat="${esc(c)}" aria-pressed="${c === active}">${esc(c)}<sup>${n}</sup></button>`).join("");
+  const setActive = c => { active = c; filters.querySelectorAll(".chip").forEach(x => x.setAttribute("aria-pressed", x.dataset.cat === c)); };
   filters.addEventListener("click", e => {
     const b = e.target.closest(".chip"); if (!b) return;
-    active = b.dataset.cat;
-    filters.querySelectorAll(".chip").forEach(x => x.setAttribute("aria-selected", x === b));
-    render();
+    setActive(b.dataset.cat); render();
   });
-  $("#q").addEventListener("input", e => { query = lower(e.target.value.trim()); render(); });
+  let qt;
+  q.addEventListener("input", () => { clearTimeout(qt); qt = setTimeout(() => { query = lower(q.value.trim()); render(); }, 120); });
 
-  // X gömmeleri: widgets.js yalnızca ilk gönderi görünür olduğunda yüklenir
+  if (tools) {
+    tools.innerHTML = (PAGE === "tweetler" ? `<span class="sort" role="group" aria-label="Sıralama"><button type="button" data-sort="secki" aria-pressed="true">Seçki sırası</button><button type="button" data-sort="yeni" aria-pressed="false">En yeni</button></span>` : "") +
+      `<a id="random" href="#liste">Rastgele</a>`;
+    tools.addEventListener("click", e => {
+      const s = e.target.closest("[data-sort]");
+      if (s) { order = s.dataset.sort; tools.querySelectorAll("[data-sort]").forEach(x => x.setAttribute("aria-pressed", x === s)); render(); return; }
+      const r = e.target.closest("#random"); if (!r) return;
+      const cur = decodeURIComponent(location.hash.slice(1)), pool = list.filter(d => d.id !== cur);
+      if (!pool.length) { e.preventDefault(); return; }
+      r.href = "#" + pool[Math.floor(Math.random() * pool.length)].id;  // varsayılan gezinme hashchange'i tetikler
+    });
+  }
+
+  // X gömmeleri: widgets.js ilk gönderi yaklaşınca yüklenir. Bekleyen alıntılar "x-tweet" sınıfıyla durur,
+  // böylece widgets.js sayfadaki tüm gönderileri bir anda işlemez; sınıf yalnızca görünüme yaklaşınca değişir.
   let wjs;
   const loadWidgets = () => wjs || (wjs = new Promise(res => {
     const s = document.createElement("script");
     s.src = "https://platform.twitter.com/widgets.js"; s.async = true; s.charset = "utf-8";
-    s.onload = () => (window.twttr && twttr.ready ? twttr.ready(res) : res()); s.onerror = () => res();
+    s.onload = () => (window.twttr && twttr.ready ? twttr.ready(res) : res());
+    s.onerror = () => { document.body.classList.add("no-x"); res(); };  // X engelliyse yedek alıntı kalır, ayrılan yer kalkar
     document.head.appendChild(s);
   }));
   const io = "IntersectionObserver" in window && new IntersectionObserver(es => es.forEach(en => {
     if (!en.isIntersecting) return; io.unobserve(en.target);
-    loadWidgets().then(() => window.twttr && twttr.widgets && twttr.widgets.load(en.target));
+    const bq = en.target.querySelector("blockquote.x-tweet"); if (!bq) return;
+    bq.className = "twitter-tweet"; bq.dataset.theme = dark() ? "dark" : "light";
+    loadWidgets().then(() => window.twttr && twttr.widgets && twttr.widgets.load(en.target))
+      .then(() => setTimeout(() => en.target.querySelector("iframe") || en.target.classList.add("failed"), 8000));  // kart gelmediyse yedek alıntıyı göster
   }), { rootMargin: "600px 0px" });
 
+  function more(n) {
+    const next = list.slice(shown, shown + n);
+    listEl.insertAdjacentHTML("beforeend", next.map(d => cfg.row(d, NUM.get(d))).join(""));
+    if (PAGE === "tweetler" && io) next.forEach(d => io.observe(document.getElementById(d.id).querySelector(".embed")));
+    shown += next.length;
+    if (moreBtn) {
+      moreBtn.hidden = shown >= list.length;
+      moreBtn.innerHTML = `Daha fazla göster <span>${shown} / ${list.length}</span>`;
+    }
+    return next[0];
+  }
   function render() {
-    const list = DATA.filter(d => (active === "Hepsi" || d.cat === active || (active === STAR && d.star)) &&
+    list = (order === "yeni" ? NEWEST : DATA).filter(d => (active === "Hepsi" || d.cat === active || (active === STAR && d.star)) &&
       (!query || lower(cfg.fields(d).join(" ")).includes(query)));
-    $("#list").innerHTML = list.map(d => cfg.row(d, String(DATA.indexOf(d) + 1).padStart(3, "0"))).join("");
+    listEl.innerHTML = ""; shown = 0;
+    more(STEP);
     $("#empty").hidden = list.length > 0;
-    if (PAGE === "tweetler" && io) document.querySelectorAll(".embed").forEach(e => io.observe(e));
   }
   render();
+  moreBtn && moreBtn.addEventListener("click", () => {
+    const first = more(STEP);
+    const a = first && document.getElementById(first.id).querySelector("a");
+    a && a.focus({ preventScroll: true });  // klavyede yeni gelen ilk girdiye geç
+  });
 
   const toast = msg => { const t = $("#toast"); t.textContent = msg; t.classList.add("show"); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove("show"), 1600); };
 
-  $("#list").addEventListener("click", async e => {
+  listEl.addEventListener("click", async e => {
     const pv = e.target.closest("[data-preview]");
     if (pv) {
       const v = pv.closest(".row").querySelector(".viewer");
@@ -108,6 +152,7 @@
         v.innerHTML = `<iframe src="${esc(pv.dataset.preview)}#view=FitH" title="PDF önizleme" loading="lazy"></iframe><p class="vnote">Görünmüyorsa <a href="${esc(pv.dataset.preview)}" target="_blank" rel="noopener">PDF'i yeni sekmede açın</a>.</p>`;
         v.hidden = false; pv.textContent = "Kapat";
       } else { v.innerHTML = ""; v.hidden = true; pv.textContent = "Önizle"; }
+      pv.setAttribute("aria-expanded", !v.hidden);
       return;
     }
     const b = e.target.closest("[data-copy]"); if (!b) return;
@@ -122,9 +167,15 @@
     if (PAGE === "tweetler" && id && !/^t\d+$/.test(id) && !["liste","hakkinda","gonder"].includes(id)) {
       location.replace("fikirler.html#" + encodeURIComponent(id)); return;
     }
-    const el = id && DATA.some(d => d.id === id) && document.getElementById(id);
-    if (!el) return;
-    el.scrollIntoView({ block: "start" });
+    const d = id && DATA.find(x => x.id === id);
+    if (!d) return;
+    // Girdi filtrede/aramada gizliyse filtreyi sıfırla; henüz çizilmediyse o noktaya kadar çiz
+    if (!list.includes(d)) { setActive("Hepsi"); query = ""; q.value = ""; render(); }
+    const i = list.indexOf(d);
+    if (i >= shown) more(Math.ceil((i + 1 - shown) / STEP) * STEP);
+    const el = document.getElementById(id);
+    el.scrollIntoView({ block: "start", behavior: "instant" });
+    el.tabIndex = -1; el.focus({ preventScroll: true });
     el.classList.add("flash"); setTimeout(() => el.classList.remove("flash"), 2500);
   }
   addEventListener("hashchange", focusHash); focusHash();

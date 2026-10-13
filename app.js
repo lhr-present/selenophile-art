@@ -5,6 +5,7 @@
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const lower = s => String(s ?? "").toLocaleLowerCase("tr");
   const dark = () => matchMedia("(prefers-color-scheme: dark)").matches;
+  const hashId = () => { try { return decodeURIComponent(location.hash.slice(1)); } catch { return ""; } };  // bozuk %-kodlu adres hata vermesin
 
   // Bu gecenin ay evresi
   const SYN = 29.530588853, ref = Date.UTC(2000,0,6,18,14);
@@ -99,7 +100,7 @@
       const s = e.target.closest("[data-sort]");
       if (s) { order = s.dataset.sort; tools.querySelectorAll("[data-sort]").forEach(x => x.setAttribute("aria-pressed", x === s)); render(); return; }
       const r = e.target.closest("#random"); if (!r) return;
-      const cur = decodeURIComponent(location.hash.slice(1)), pool = list.filter(d => d.id !== cur);
+      const cur = hashId(), pool = list.filter(d => d.id !== cur);
       if (!pool.length) { e.preventDefault(); return; }
       r.href = "#" + pool[Math.floor(Math.random() * pool.length)].id;  // varsayılan gezinme hashchange'i tetikler
     });
@@ -168,13 +169,13 @@
   });
 
   function focusHash() {
-    const id = decodeURIComponent(location.hash.slice(1));
+    const id = hashId();
     // Eskiden ana sayfadaki fikir bağlantıları artık fikirler.html'de
     if (PAGE === "tweetler" && id && !/^t\d+$/.test(id) && !["liste","hakkinda","gonder"].includes(id)) {
       location.replace("fikirler.html#" + encodeURIComponent(id)); return;
     }
     const d = id && DATA.find(x => x.id === id);
-    if (!d) return;
+    if (!d) { id && !document.getElementById(id) && toast("Bu girdi artık listede yok"); return; }  // kaldırılmış girdinin eski bağlantısı
     // Girdi filtrede/aramada gizliyse filtreyi sıfırla; henüz çizilmediyse o noktaya kadar çiz
     if (!list.includes(d)) { setActive("Hepsi"); query = ""; q.value = ""; render(); }
     const i = list.indexOf(d);

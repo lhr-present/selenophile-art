@@ -19,8 +19,14 @@
 
   // Gömme için önceden yer ayrılır (X kartı gelince sayfa kaymasın). Tahmin, 390 ve 1440px'te
   // ölçülen kart yüksekliklerinden: yazı uzunluğuna göre; görselli kartlar CSS'te genişliğe göre.
-  const embedStyle = d => /pic\.(twitter|x)\.com/.test(d.text) ? ' class="embed media"'
-    : ` class="embed" style="min-height:${Math.min(700, Math.round(190 + 0.6 * d.text.replace(/<[^>]+>/g, "").length + 11 * (d.text.split("<br>").length - 1)))}px"`;
+  // Ölçülmüş yükseklik varsa (hm: 390px telefon, hd: masaüstü) onu kullan; yoksa tahmine düş.
+  const narrow = matchMedia("(max-width: 980px)").matches;
+  const embedStyle = d => {
+    const h = narrow ? d.hm : d.hd;
+    if (h) return ` class="embed" style="min-height:${h}px"`;
+    return /pic\.(twitter|x)\.com/.test(d.text) ? ' class="embed media"'
+      : ` class="embed" style="min-height:${Math.min(700, Math.round(190 + 0.6 * d.text.replace(/<[^>]+>/g, "").length + 11 * (d.text.split("<br>").length - 1)))}px"`;
+  };
 
   const PAGES = {
     fikirler: {

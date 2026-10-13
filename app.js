@@ -41,7 +41,7 @@
     tweetler: {
       data: window.TWEETLER || [],
       fields: d => [d.title, d.summary, d.text.replace(/<[^>]+>/g, " "), d.author, d.handle, d.cat],
-      row: (d, n) => `<li class="row trow" id="${esc(d.id)}">
+      row: (d, n) => `<li class="row trow${d.star ? " is-star" : ""}" id="${esc(d.id)}">
         <span class="num">${n}</span>
         <div class="tmeta">
           <span class="who">${esc(d.author)} <span class="what">${esc(d.handle)}</span></span>
@@ -59,7 +59,7 @@
     pdfler: {
       data: window.BELGELER || [],
       fields: d => [d.title, d.summary, d.author, d.cat, d.type, d.date],
-      row: (d, n) => `<li class="row" id="${esc(d.id)}">
+      row: (d, n) => `<li class="row${d.star ? " is-star" : ""}" id="${esc(d.id)}">
         <span class="num">${n}</span>
         <div><h3><a href="${esc(d.url)}" target="_blank" rel="noopener">${esc(d.title)}</a></h3>
           <p>${esc(d.summary)}</p><div class="viewer" hidden></div></div>

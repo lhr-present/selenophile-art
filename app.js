@@ -15,6 +15,8 @@
   document.querySelectorAll(".phase-name").forEach(e => e.textContent = phase);
   document.querySelectorAll(".yr").forEach(e => e.textContent = new Date().getFullYear());
 
+  // Başlıktaki ara çizgi satır başına düşmesin: "Consistent –" birlikte kalır
+  const ttl = t => esc(t).replace(/ ([–—-]) /g, "\u00a0$1 ");
   const langAttr = t => /^[\x00-\x7F’‘“”–—…]*$/.test(t) && /[a-z]/i.test(t) ? ' lang="en"' : "";  // İngilizce başlıklar doğru okunsun
   const typeLabel = { makale: "yazı", thread: "thread", tweet: "tweet", "konuşma": "konuşma" };
   const links = (url, id, name, extra = "") =>
@@ -37,7 +39,7 @@
       fields: d => [d.title, d.summary, d.author, d.handle, d.cat],
       row: (d, n) => `<li class="row" id="${esc(d.id)}">
         <span class="num">${n}</span>
-        <div><h3${langAttr(d.title)}><a href="${esc(d.url)}" target="_blank" rel="noopener">${esc(d.title)}</a></h3><p>${esc(d.summary)}</p></div>
+        <div><h3${langAttr(d.title)}><a href="${esc(d.url)}" target="_blank" rel="noopener">${ttl(d.title)}</a></h3><p>${esc(d.summary)}</p></div>
         <div class="side"><span class="who">${esc(d.author)}</span><span class="what">${esc(d.cat)}, ${esc(typeLabel[d.type] || d.type)}</span>${links(d.url, d.id, d.title)}</div></li>`
     },
     tweetler: {
@@ -48,7 +50,7 @@
         <div class="tmeta">
           <span class="who">${esc(d.author)} <span class="what">${esc(d.handle)}</span></span>
           <span class="what">${d.star ? '<b class="star">★ milyon dolarlık</b> · ' : ""}${esc(d.cat)}, ${esc(d.type)}${d.date ? ' · <span class="nw">' + esc(d.date) + "</span>" : ""}</span>
-          ${d.title ? `<h3 class="ttitle"><a href="${esc(d.url)}" target="_blank" rel="noopener">${esc(d.title)}</a></h3>` : ""}
+          ${d.title ? `<h3 class="ttitle"><a href="${esc(d.url)}" target="_blank" rel="noopener">${ttl(d.title)}</a></h3>` : ""}
           ${d.summary ? `<p class="tsum">${esc(d.summary)}</p>` : `<p class="tsum muted">İçerik gönderi kartında.</p>`}
           ${links(d.url, d.id, d.title || d.author)}
         </div>
@@ -63,7 +65,7 @@
       fields: d => [d.title, d.summary, d.author, d.cat, d.type, d.date],
       row: (d, n) => `<li class="row${d.star ? " is-star" : ""}" id="${esc(d.id)}">
         <span class="num">${n}</span>
-        <div><h3${langAttr(d.title)}><a href="${esc(d.url)}" target="_blank" rel="noopener">${esc(d.title)}</a></h3>
+        <div><h3${langAttr(d.title)}><a href="${esc(d.url)}" target="_blank" rel="noopener">${ttl(d.title)}</a></h3>
           <p>${esc(d.summary)}</p><div class="viewer" hidden></div></div>
         <div class="side"><span class="who">${esc(d.author)}</span><span class="what">${esc(d.date)} · ${esc(d.type)}${d.pdf ? ' · <b class="badge">PDF</b>' : ""}</span>
           <span class="what">${d.star ? '<b class="star">★ milyon dolarlık</b> · ' : ""}${esc(d.cat)}</span>
@@ -176,7 +178,7 @@
     const b = e.target.closest("[data-copy]"); if (!b) return;
     const link = `${location.origin}${location.pathname}#${b.dataset.copy}`;
     try { await navigator.clipboard.writeText(link); toast("Bağlantı kopyalandı"); }
-    catch { prompt("Bağlantıyı kopyalayın:", link); }
+    catch { prompt("Bağlantıyı kopyala:", link); }
   });
 
   function focusHash() {

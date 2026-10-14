@@ -144,7 +144,8 @@ h2{font-size:1.9rem;font-weight:800;letter-spacing:-.03em}
 .ttitle a{text-decoration:none}
 .ttitle a:hover{color:var(--red)}
 .ttitle+.tsum{margin-top:6px!important;font-size:1rem;color:var(--soft)!important}
-.star{color:var(--red);font-weight:700;font-size:.78em;letter-spacing:.06em;text-transform:uppercase}
+/* kenar boşluğundaki kırmızı numara + ★ zaten işaretliyor; etiket ekran okuyucu için kalır, gözde sessizleşir */
+.star{color:var(--red);font-weight:500}
 .chip[data-cat^="★"]{color:var(--red)}
 
 
@@ -170,3 +171,8 @@ h2{font-size:1.9rem;font-weight:800;letter-spacing:-.03em}
 @media (max-width:720px){.links a,.links button,.tool-links button,.tool-links a,.top nav a,.intro-side .meta a{padding:11px 0;margin:-11px 0}.mark{padding:7px 0;margin:-7px 0}}
 @media print{.trow .links{display:block!important}.links button{display:none}.trow .links a::after{content:" " attr(href);font-size:8pt;word-break:break-all}}
 .nw{white-space:nowrap}
+
+/* JavaScript kapalıyken: liste çizilemez; kısa bir not ve veri dosyasına bağlantı */
+.noscript{padding:24px 0 28px;border-top:1px solid var(--fg);border-bottom:1px solid var(--rule);color:var(--soft);max-width:62ch}
+.noscript a{color:var(--fg);text-underline-offset:3px}
+.noscript code{font:inherit;font-weight:500}

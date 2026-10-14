@@ -47,7 +47,7 @@
         <span class="num">${n}</span>
         <div class="tmeta">
           <span class="who">${esc(d.author)} <span class="what">${esc(d.handle)}</span></span>
-          <span class="what">${d.star ? '<b class="star">★ milyon dolarlık</b> · ' : ""}${esc(d.cat)}, ${esc(d.type)}${d.date ? " · " + esc(d.date) : ""}</span>
+          <span class="what">${d.star ? '<b class="star">★ milyon dolarlık</b> · ' : ""}${esc(d.cat)}, ${esc(d.type)}${d.date ? ' · <span class="nw">' + esc(d.date) + "</span>" : ""}</span>
           ${d.title ? `<h3 class="ttitle"><a href="${esc(d.url)}" target="_blank" rel="noopener">${esc(d.title)}</a></h3>` : ""}
           ${d.summary ? `<p class="tsum">${esc(d.summary)}</p>` : `<p class="tsum muted">İçerik gönderi kartında.</p>`}
           ${links(d.url, d.id, d.title || d.author)}
@@ -145,7 +145,7 @@
   function render() {
     list = (order === "yeni" ? NEWEST : DATA).filter(d => (active === "Hepsi" || d.cat === active || (active === STAR && d.star)) &&
       (!query || lower(cfg.fields(d).join(" ")).includes(query)));
-    listEl.innerHTML = ""; shown = 0;
+    listEl.innerHTML = ""; listEl.classList.add("ready"); shown = 0;
     more(STEP);
     $("#empty").hidden = list.length > 0;
   }

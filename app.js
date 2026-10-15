@@ -120,23 +120,64 @@
     s.onerror = () => { document.body.classList.add("no-x"); res(); };  // X engelliyse yedek alıntı kalır, ayrılan yer kalkar
     document.head.appendChild(s);
   }));
-  const io = "IntersectionObserver" in window && new IntersectionObserver(es => es.forEach(en => {
-    if (!en.isIntersecting) return; io.unobserve(en.target);
-    const bq = en.target.querySelector("blockquote.x-tweet"); if (!bq) return;
+  // Ekrandan uzaklaşan kartlar geri dönüştürülür: iframe kaldırılır, yerine bekleyen alıntı konur (boy kilitli).
+  // Her X kartı ~3 MB; böylece aynı anda en fazla birkaç düzine canlı kart kalır, telefonda sekme çökmez.
+  const KEEP = 24, liveSet = new Set();
+  const embed = em => {
+    const bq = em.querySelector("blockquote.x-tweet"); if (!bq || em._st) return;
+    const g = em._gen = (em._gen || 0) + 1, ok = () => em._gen === g && em.isConnected;
+    em._st = "loading"; liveSet.add(em);
+    if (em.style.height) { em.style.height = em.style.overflow = ""; }  // kilit min-height olarak kalır; kart büyürse sığar
     bq.className = "twitter-tweet"; bq.dataset.theme = dark() ? "dark" : "light";
-    loadWidgets().then(() => window.twttr && twttr.widgets && twttr.widgets.load(en.target))
-      .then(() => setTimeout(() => en.target.querySelector("iframe") || en.target.classList.add("failed"), 8000));  // kart gelmediyse yedek alıntıyı göster
-  }), { rootMargin: "600px 0px" });
+    loadWidgets().then(() => {
+      if (!ok() || !(window.twttr && twttr.widgets && twttr.widgets.load)) return;  // kart bu arada geri dönüştüyse/silindiyse dokunma
+      try { return Promise.race([twttr.widgets.load(em), new Promise(r => setTimeout(r, 10000))]); } catch {}
+    }).catch(() => {}).then(() => {
+      if (!ok()) return;
+      em._st = "live";
+      setTimeout(() => ok() && !em.querySelector("iframe") && em.classList.add("failed"), 8000);  // kart gelmediyse yedek alıntıyı göster
+      em._far ? recycle(em) : trim();
+    });
+  };
+  const recycle = em => {
+    if (em._st !== "live" || !em.isConnected) return;  // yüklenirken dokunulmaz (widgets.js yarışı); yüklenince yeniden bakılır
+    const h = em.offsetHeight;
+    em.style.minHeight = em.style.height = h + "px"; em.style.overflow = "hidden";  // önce boy kilitlenir: üstteki kart değişse de içerik kaymaz
+    em._gen++; em._st = ""; liveSet.delete(em);
+    em.classList.remove("failed"); em.innerHTML = em._html;  // io gözlemi sürer: kart yeniden yaklaşınca tekrar gömülür
+  };
+  // Güvenlik sınırı: canlı kart sayısı KEEP'i aşarsa görünüme en uzak olanlar (yaklaşma bandının dışındakiler) bırakılır
+  const trim = () => {
+    if (liveSet.size <= KEEP) return;
+    const vh = innerHeight, dist = em => { const r = em.getBoundingClientRect(); return r.bottom < 0 ? -r.bottom : r.top > vh ? r.top - vh : 0; };
+    [...liveSet].filter(em => em._st === "live").map(em => [dist(em), em]).filter(([d]) => d > 1200)
+      .sort((a, b) => b[0] - a[0]).slice(0, liveSet.size - KEEP).forEach(([, em]) => recycle(em));
+  };
+  // Kart görünüme ~1000 px yaklaşıp ~150 ms orada kalırsa gömülür: hızlı kaydırmada yanından geçilen kartlar için
+  // iframe açılmaz, normal hızda ise kart ekrana girmeden hazır olur
+  const io = "IntersectionObserver" in window && new IntersectionObserver(es => es.forEach(en => {
+    const em = en.target; em._near = en.isIntersecting;
+    em._near && !em._st && setTimeout(() => em._near && embed(em), 150);
+  }), { rootMargin: "1000px 0px" });
+  // ~3 ekran boyu uzaktaki canlı kart geri dönüştürülür
+  const far = io && new IntersectionObserver(es => es.forEach(en => {
+    const em = en.target; em._far = !en.isIntersecting; em._far && recycle(em);
+  }), { rootMargin: "300% 0px" });
 
-  // Ekranın üstünde kalmış bir X kartı geç yüklenip boy değiştirirse, görünen içerik kaymasın diye sayfayı o kadar kaydır
-  const ro = "ResizeObserver" in window && new ResizeObserver(es => es.forEach(e => {
+  // Ekranın üstünde kalmış bir X kartı geç yüklenip boy değiştirirse, görünen içerik kaymasın diye sayfayı o kadar kaydır.
+  // Tarayıcı bunu kendisi yapıyorsa (overflow-anchor) yapılmaz; yoksa kayma iki kez düzeltilir ve sayfa zıplar.
+  const nativeAnchor = window.CSS && CSS.supports && CSS.supports("overflow-anchor", "auto");
+  const ro = !nativeAnchor && "ResizeObserver" in window && new ResizeObserver(es => es.forEach(e => {
     const el = e.target, h = el.offsetHeight, p = el._h; el._h = h;
-    if (p != null && h !== p && el.getBoundingClientRect().bottom <= 0) scrollBy(0, h - p);
+    if (p != null && h !== p && el.getBoundingClientRect().bottom <= 0) scrollBy({ top: h - p, behavior: "instant" });  // html{scroll-behavior:smooth} bu düzeltmeyi canlandırmasın
   }));
   function more(n) {
     const next = list.slice(shown, shown + n);
     listEl.insertAdjacentHTML("beforeend", next.map(d => cfg.row(d, NUM.get(d))).join(""));
-    if (PAGE === "tweetler" && io) next.forEach(d => { const em = document.getElementById(d.id).querySelector(".embed"); io.observe(em); ro && ro.observe(em); });
+    if (PAGE === "tweetler" && io) next.forEach(d => {
+      const em = document.getElementById(d.id).querySelector(".embed");
+      em._html = em.innerHTML; io.observe(em); far.observe(em); ro && ro.observe(em);
+    });
     shown += next.length;
     if (moreBtn) {
       moreBtn.hidden = shown >= list.length;
@@ -147,6 +188,7 @@
   function render() {
     list = (order === "yeni" ? NEWEST : DATA).filter(d => (active === "Hepsi" || d.cat === active || (active === STAR && d.star)) &&
       (!query || lower(cfg.fields(d).join(" ")).includes(query)));
+    if (io) { io.disconnect(); far.disconnect(); ro && ro.disconnect(); liveSet.clear(); }  // eski satırlar bırakılır
     listEl.innerHTML = ""; listEl.classList.add("ready"); shown = 0;
     more(STEP);
     $("#empty").hidden = list.length > 0;
@@ -169,7 +211,7 @@
     if (pv) {
       const v = pv.closest(".row").querySelector(".viewer");
       if (v.hidden) {
-        v.innerHTML = `<iframe src="${esc(pv.dataset.preview)}#view=FitH" title="PDF önizleme" loading="lazy"></iframe><p class="vnote">Görünmüyorsa <a href="${esc(pv.dataset.preview)}" target="_blank" rel="noopener">PDF'i yeni sekmede aç</a>.</p>`;
+        v.innerHTML = `<iframe src="${esc(pv.dataset.preview)}#view=FitH" title="PDF önizleme" loading="lazy"></iframe><p class="vnote">Görünmüyorsa <a href="${esc(pv.dataset.preview)}" target="_blank" rel="noopener">PDF'yi yeni sekmede aç</a>.</p>`;
         v.hidden = false; pv.textContent = "Kapat";
       } else { v.innerHTML = ""; v.hidden = true; pv.textContent = "Önizle"; }
       pv.setAttribute("aria-expanded", !v.hidden);
